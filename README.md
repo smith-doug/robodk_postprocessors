@@ -19,10 +19,9 @@ This is an example of a pre-processed program that can be used to generate any v
 ```python
 import sys
 import os
-sys.path.append(os.path.abspath("C:/RoboDK/Posts/")) # temporarily add the path to POSTS folder
 
 # link to a specific post processor
-from Universal_Robots import *
+from robodk_postprocessors.Universal_Robots import *
 
 def Pose(xyzrpw):
     [x,y,z,r,p,w] = xyzrpw
