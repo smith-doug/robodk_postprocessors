@@ -8,6 +8,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from dataclasses import dataclass, field
+
+from typing import List
+
 
 # ----------------------------------------------------
 # This file is a POST PROCESSOR for Robot Offline Programming to generate programs 
@@ -62,8 +66,17 @@ def get_safe_name(progname, max_chars=32):
 # ----------------------------------------------------
 # Import RoboDK tools
 from .robodk import *
-from .BasePost import BasePost
+from .BasePost import BasePost, BaseRoboDKConfig
 import sys
+
+
+@dataclass
+class RoboDKConfig(BaseRoboDKConfig):
+    PULSES_X_DEG: List[int] = field(default_factory=list)
+    # = field(default_factory=lambda: [1, 1, 1, 1, 1, 1])
+    AXES_TYPE: List[str] = field(default_factory=list)
+    # = field(default_factory=lambda: ['R', 'R', 'R', 'R', 'R', 'R'])
+    robot_post = "Motoman"
 
 
 # ----------------------------------------------------

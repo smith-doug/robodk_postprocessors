@@ -10,6 +10,9 @@
 # limitations under the License.
 from __future__ import annotations
 
+from dataclasses import dataclass
+from dataclass_wizard import YAMLWizard
+
 # ----------------------------------------------------
 # This file is a sample POST PROCESSOR script to generate programs
 # for a generic robot with RoboDK
@@ -80,9 +83,16 @@ def joints_2_str(joints):
     return str
 
 
+@dataclass
+class BaseRoboDKConfig(YAMLWizard):
+    robot_post: str | None = None  # name of the post processor
+    robot_name: str | None = None  # name of the robot
+    robot_axes: int = 6  # number of axes of the robot
+
+
 # ----------------------------------------------------
 # Object class that handles the robot instructions/syntax
-class RobotPost(ABC):
+class BasePost(ABC):
     """Robot Post Processor object"""
 
     # Set the program extension
@@ -97,6 +107,12 @@ class RobotPost(ABC):
     PROG = []
     LOG = ''
     nAxes = 6
+
+    @classmethod
+    def from_config(cls, config: BaseRoboDKConfig) -> BasePost:
+        pp = cls(config.robot_post, config.robot_name, config.robot_axes)
+        pp.__dict__.update(**config.__dict__)
+        return pp
 
     def __init__(self, robotpost=None, robotname=None, robot_axes=6, **kwargs):
         """Create a new post processor.
