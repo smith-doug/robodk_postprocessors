@@ -8,6 +8,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import annotations
 
 # ----------------------------------------------------
 # This file is a sample POST PROCESSOR script to generate programs
@@ -41,11 +42,13 @@
 #      http://www.robodk.com/doc/PythonAPI/postprocessor.html
 # ----------------------------------------------------
 
+# Changes
+# Turn this into an abstract base class
+
 # ----------------------------------------------------
 # Import RoboDK tools
-from robodk.robomath import *
-from robodk.robodialogs import *
-from robodk.robofileio import *
+from .robodk import *
+from abc import ABC, abstractmethod
 
 
 # ----------------------------------------------------
@@ -79,7 +82,7 @@ def joints_2_str(joints):
 
 # ----------------------------------------------------
 # Object class that handles the robot instructions/syntax
-class RobotPost(object):
+class RobotPost(ABC):
     """Robot Post Processor object"""
 
     # Set the program extension
@@ -111,6 +114,7 @@ class RobotPost(object):
         self.LOG = ''
         self.nAxes = robot_axes
 
+    @abstractmethod
     def ProgStart(self, progname):
         """Start a new program given a name. Multiple programs can be generated at the same times.
 
@@ -120,8 +124,10 @@ class RobotPost(object):
         :param progname: name of the program
         :type progname: str
         """
-        self.addline('PROC %s()' % progname)
 
+        pass
+
+    @abstractmethod
     def ProgFinish(self, progname):
         """This method is executed to define the end of a program or procedure. One module may
         have more than one program. No other instructions will be executed before another
@@ -133,8 +139,10 @@ class RobotPost(object):
         :param progname: name of the program
         :type progname: str
         """
-        self.addline('ENDPROC')
 
+        pass
+
+    @abstractmethod
     def ProgSave(self, folder, progname, ask_user=False, show_result=False):
         """Saves the program. This method is executed after all programs have been processed.
 
@@ -153,39 +161,8 @@ class RobotPost(object):
         preferred text editor
         :type show_result: bool, str
         """
-        progname = progname + '.' + self.PROG_EXT
-        if ask_user or not DirExists(folder):
-            filesave = getSaveFile(folder, progname, 'Save program as...')
-            if filesave is not None:
-                filesave = filesave.name
-            else:
-                return
-        else:
-            filesave = folder + '/' + progname
 
-        # Japanese controllers need the shift_jis codec and replace errors to not throw errors on
-        # non supported characters
-
-        # with open(filesave, "w", encoding="shift_jis", errors="replace") as fid:
-        with open(filesave, "w", encoding="utf-8") as fid:
-            for line in self.PROG:
-                fid.write(line)
-                fid.write("\n")
-
-        print('SAVED: %s\n' % filesave)
-        # ---------------------- show result
-        if show_result:
-            if type(show_result) is str:
-                # Open file with provided application
-                import subprocess
-                p = subprocess.Popen([show_result, filesave])
-            else:
-                # open file with default application
-                import os
-                os.startfile(filesave)
-
-            if len(self.LOG) > 0:
-                mbox('Program generation LOG:\n\n' + self.LOG)
+        pass
 
     def ProgSendRobot(self, robot_ip, remote_path, ftp_user, ftp_pass):
         """Send a program to the robot using the provided parameters. This method is executed
@@ -203,6 +180,7 @@ class RobotPost(object):
         """
         UploadFTP(self.PROG_FILES, robot_ip, remote_path, ftp_user, ftp_pass)
 
+    @abstractmethod
     def MoveJ(self, pose, joints, conf_RLF=None):
         """Defines a joint movement.
 
@@ -218,8 +196,10 @@ class RobotPost(object):
         0] means [front, upper arm and non-flip] configuration
         :type conf_RLF: int list
         """
-        self.addline('MOVJ ' + joints_2_str(joints))
 
+        pass
+
+    @abstractmethod
     def MoveL(self, pose, joints, conf_RLF=None):
         """Defines a linear movement.
 
@@ -235,8 +215,9 @@ class RobotPost(object):
         0] means [front, upper arm and non-flip] configuration
         :type conf_RLF: int list
         """
-        self.addline('MOVL ' + pose_2_str(pose))
+        pass
 
+    @abstractmethod
     def MoveC(self, pose1, joints1, pose2, joints2, conf_RLF_1=None, conf_RLF_2=None):
         """Defines a circular movement.
 
@@ -256,8 +237,9 @@ class RobotPost(object):
         :param conf_RLF_2: robot configuration of the final point
         :type conf_RLF_2: int list
         """
-        self.addline('MOVC ' + pose_2_str(pose1) + ' ' + pose_2_str(pose2))
+        pass
 
+    @abstractmethod
     def setFrame(self, pose, frame_id=None, frame_name=None):
         """Defines a new reference frame with respect to the robot base frame. This reference
         frame is used for following pose targets used by movement instructions.
@@ -272,8 +254,9 @@ class RobotPost(object):
         :param frame_name: Name of the reference frame as defined in RoboDK
         :type frame_name: str
         """
-        self.addline('BASE_FRAME ' + pose_2_str(pose))
+        pass
 
+    @abstractmethod
     def setTool(self, pose, tool_id=None, tool_name=None):
         """Change the robot TCP (Tool Center Point) with respect to the robot flange. Any
         movement defined in Cartesian coordinates assumes that it is using the last reference
@@ -289,8 +272,9 @@ class RobotPost(object):
         :param tool_name: Name of the reference frame as defined in RoboDK
         :type tool_name: str
         """
-        self.addline('TOOL_FRAME ' + pose_2_str(pose))
+        pass
 
+    @abstractmethod
     def Pause(self, time_ms):
         """Defines a pause in a program (including movements). time_ms is negative if the pause
         must provoke the robot to stop until the user desires to continue the program.
@@ -301,11 +285,9 @@ class RobotPost(object):
         :param time_ms: time of the pause, in milliseconds
         :type time_ms: float
         """
-        if time_ms < 0:
-            self.addline('PAUSE')
-        else:
-            self.addline('WAIT %.3f' % (time_ms * 0.001))
+        pass
 
+    @abstractmethod
     def setSpeed(self, speed_mms):
         """Changes the robot speed (in mm/s)
 
@@ -315,8 +297,9 @@ class RobotPost(object):
         :param speed_mms: speed in :math:`mm/s`
         :type speed_mms: float
         """
-        self.addlog('setSpeed not defined (%.2f mms)' % speed_mms)
+        pass
 
+    @abstractmethod
     def setAcceleration(self, accel_mmss):
         """Changes the robot acceleration (in mm/s2)
 
@@ -327,8 +310,9 @@ class RobotPost(object):
         :param accel_mmss: speed in :math:`mm/s^2`
         :type accel_mmss: float
         """
-        self.addlog('setAcceleration not defined')
+        pass
 
+    @abstractmethod
     def setSpeedJoints(self, speed_degs):
         """Changes the robot joint speed (in deg/s)
 
@@ -339,8 +323,9 @@ class RobotPost(object):
         :param speed_degs: speed in :math:`deg/s`
         :type speed_degs: float
         """
-        self.addlog('setSpeedJoints not defined')
+        pass
 
+    @abstractmethod
     def setAccelerationJoints(self, accel_degss):
         """Changes the robot joint acceleration (in deg/s2)
 
@@ -351,8 +336,9 @@ class RobotPost(object):
         :param accel_degss: speed in :math:`deg/s^2`
         :type accel_degss: float
         """
-        self.addlog('setAccelerationJoints not defined')
+        pass
 
+    @abstractmethod
     def setZoneData(self, zone_mm):
         """Changes the smoothing radius (also known as rounding, blending radius, CNT,
         APO or zone data). If this parameter is higher it helps making the movement smoother
@@ -363,8 +349,9 @@ class RobotPost(object):
         :param zone_mm: rounding radius in mm
         :type zone_mm: float
         """
-        self.addlog('setZoneData not defined (%.1f mm)' % zone_mm)
+        pass
 
+    @abstractmethod
     def setDO(self, io_var, io_value):
         """Sets a variable (usually a digital output) to a given value. This method can also be
         used to set other variables.
@@ -377,17 +364,9 @@ class RobotPost(object):
         :param io_value: value of the variable, provided as a str, float or int
         :type io_value: int, float, str
         """
-        if type(io_var) != str:  # set default variable name if io_var is a number
-            io_var = 'OUT[%s]' % str(io_var)
-        if type(io_value) != str:  # set default variable value if io_value is a number
-            if io_value > 0:
-                io_value = 'TRUE'
-            else:
-                io_value = 'FALSE'
+        pass
 
-        # at this point, io_var and io_value must be string values
-        self.addline('%s=%s' % (io_var, io_value))
-
+    @abstractmethod
     def waitDI(self, io_var, io_value, timeout_ms=-1):
         """Waits for a variable (usually a digital input) to attain a given value io_value. This
         method can also be used to set other variables.Optionally, a timeout can be provided.
@@ -402,20 +381,10 @@ class RobotPost(object):
         :param timeout_ms: maximum wait time
         :type timeout_ms: float, int
         """
-        if type(io_var) != str:  # set default variable name if io_var is a number
-            io_var = 'IN[%s]' % str(io_var)
-        if type(io_value) != str:  # set default variable value if io_value is a number
-            if io_value > 0:
-                io_value = 'TRUE'
-            else:
-                io_value = 'FALSE'
 
-        # at this point, io_var and io_value must be string values
-        if timeout_ms < 0:
-            self.addline('WAIT FOR %s==%s' % (io_var, io_value))
-        else:
-            self.addline('WAIT FOR %s==%s TIMEOUT=%.1f' % (io_var, io_value, timeout_ms))
+        pass
 
+    @abstractmethod
     def RunCode(self, code, is_function_call=False):
         """Adds code or a function call.
 
@@ -427,14 +396,10 @@ class RobotPost(object):
         :type code: str
         :type is_function_call: bool
         """
-        if is_function_call:
-            code.replace(' ', '_')
-            if not code.endswith(')'):
-                code = code + '()'
-            self.addline(code)
-        else:
-            self.addline(code)
 
+        pass
+
+    @abstractmethod
     def RunMessage(self, message, iscomment=False):
         """Display a message in the robot controller screen (teach pendant)
 
@@ -447,22 +412,19 @@ class RobotPost(object):
         but as a comment on the code
         :type iscomment: bool
         """
-        if iscomment:
-            self.addline('% ' + message)
-        else:
-            # self.addlog('Show message on teach pendant not implemented (%s)' % message)
-            self.addline('% Show message: ' + message)
+        pass
 
     # ------------------ private ----------------------
-
+    @abstractmethod
     def addline(self, newline):
         """Add a new program line. This is a private method used only by the other methods.
 
         :param newline: new line to add.
         :type newline: str
         """
-        self.PROG.append(newline)
+        pass
 
+    @abstractmethod
     def addlog(self, newline):
         """Add a message to the log. This is a private method used only by the other methods. The
         log is displayed when the program is generated to show any issues when the robot program
@@ -471,15 +433,47 @@ class RobotPost(object):
         :param newline: new line
         :type newline: str
         """
-        self.LOG = self.LOG + newline + '\n'
+        pass
 
 
 # -------------------------------------------------
 # ------------ For testing purposes ---------------
+
+def Pose(xyzrpw) -> Mat:
+    [x, y, z, r, p, w] = xyzrpw
+    a = r * math.pi / 180
+    b = p * math.pi / 180
+    c = w * math.pi / 180
+    ca = math.cos(a)
+    sa = math.sin(a)
+    cb = math.cos(b)
+    sb = math.sin(b)
+    cc = math.cos(c)
+    sc = math.sin(c)
+    return Mat([[cb * ca, ca * sc * sb - cc * sa, sc * sa + cc * ca * sb, x],
+                [cb * sa, cc * ca + sc * sb * sa, cc * sb * sa - ca * sc, y],
+                [-sb, cb * sc, cc * cb, z], [0, 0, 0, 1]])
+
+
+def PosePP(x, y, z, r, p, w) -> Mat:
+    a = r * math.pi / 180
+    b = p * math.pi / 180
+    c = w * math.pi / 180
+    ca = math.cos(a)
+    sa = math.sin(a)
+    cb = math.cos(b)
+    sb = math.sin(b)
+    cc = math.cos(c)
+    sc = math.sin(c)
+    return Mat([[cb * ca, ca * sc * sb - cc * sa, sc * sa + cc * ca * sb, x],
+                [cb * sa, cc * ca + sc * sb * sa, cc * sb * sa - ca * sc, y],
+                [-sb, cb * sc, cc * cb, z], [0, 0, 0, 1]])
+
+
 def test_post():
     """Test the post processor with a simple program"""
 
-    from robodk.robomath import PosePP as p
+    p = PosePP
 
     r = RobotPost()
 

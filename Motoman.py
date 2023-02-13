@@ -62,12 +62,13 @@ def get_safe_name(progname, max_chars=32):
 # ----------------------------------------------------
 # Import RoboDK tools
 from .robodk import *
+from .BasePost import BasePost
 import sys
 
 
 # ----------------------------------------------------
 # Object class that handles the robot instructions/syntax
-class RobotPost(object):
+class RobotPost(BasePost):
     """Robot post object defined for Motoman robots"""
     PROG_EXT = 'JBI'  # set the program extension
     MAX_LINES_X_PROG = 2000  # maximum number of lines per program. It will then generate
@@ -144,12 +145,15 @@ class RobotPost(object):
                      None]  # [pulses(None, Pulses(0), Cartesian) ,  base(or None), tool, config]
 
     def __init__(self, robotpost=None, robotname=None, robot_axes=6, **kwargs):
+        super().__init__(robotpost, robotname, robot_axes, **kwargs
+                         )
         if self.DONT_USE_MFRAME:
             self.ACTIVE_FRAME = None
         self.ROBOT_POST = robotpost
         self.ROBOT_NAME = robotname
         self.nAxes = robot_axes
         self.PROG = []
+        self.PROG_LIST = []
         self.LOG = ''
         # for k,v in kwargs.iteritems(): # python2
         for k, v in kwargs.items():
