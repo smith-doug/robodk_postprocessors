@@ -76,7 +76,7 @@ class RoboDKConfig(BaseRoboDKConfig):
     # = field(default_factory=lambda: [1, 1, 1, 1, 1, 1])
     AXES_TYPE: List[str] = field(default_factory=list)
     # = field(default_factory=lambda: ['R', 'R', 'R', 'R', 'R', 'R'])
-    robot_post = "Motoman"
+    robot_post: str = "Motoman"
 
 
 # ----------------------------------------------------

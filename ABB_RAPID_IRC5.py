@@ -8,6 +8,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import annotations
+from dataclasses import dataclass, field
+from typing import List
 
 # ----------------------------------------------------
 # This file is a POST PROCESSOR for Robot Offline Programming to generate programs 
@@ -45,6 +48,7 @@
 # ----------------------------------------------------
 # Import RoboDK tools
 from .robodk import *
+from .BasePost import BasePost, BaseRoboDKConfig
 
 ONETAB = '    '  # one tab equals 4 spaces
 
@@ -99,9 +103,14 @@ def extaxes_2_str(angles):
     return '[%s]' % extaxes_str
 
 
+@dataclass
+class RoboDKConfig(BaseRoboDKConfig):
+    robot_post: str = "ABB_RAPID_IRC5"
+
+
 # ----------------------------------------------------
 # Object class that handles the robot instructions/syntax
-class RobotPost(object):
+class RobotPost(BasePost):
     """Robot post object"""
     MAX_LINES_X_PROG = 5000  # maximum number of lines per program. It will then generate
     # multiple "pages (files)"
