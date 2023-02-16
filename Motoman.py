@@ -158,8 +158,7 @@ class RobotPost(BasePost):
                      None]  # [pulses(None, Pulses(0), Cartesian) ,  base(or None), tool, config]
 
     def __init__(self, robotpost=None, robotname=None, robot_axes=6, **kwargs):
-        super().__init__(robotpost, robotname, robot_axes, **kwargs
-                         )
+        super().__init__(robotpost, robotname, robot_axes, **kwargs)
         if self.DONT_USE_MFRAME:
             self.ACTIVE_FRAME = None
         self.ROBOT_POST = robotpost

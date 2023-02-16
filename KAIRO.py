@@ -8,6 +8,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import annotations
+from dataclasses import dataclass, field
 
 # ----------------------------------------------------
 # This file is a POST PROCESSOR for Robot Offline Programming to generate programs
@@ -45,6 +47,7 @@
 # ----------------------------------------------------
 # Import RoboDK tools
 from .robodk import *
+from .BasePost import BasePost, BaseRoboDKConfig
 
 
 # ----------------------------------------------------
@@ -64,9 +67,18 @@ def angles_2_str(angles):
     return str
 
 
+@dataclass
+class RoboDKConfig(BaseRoboDKConfig):
+    PULSES_X_DEG: list[int] = field(default_factory=list)
+    # = field(default_factory=lambda: [1, 1, 1, 1, 1, 1])
+    AXES_TYPE: list[str] = field(default_factory=list)
+    # = field(default_factory=lambda: ['R', 'R', 'R', 'R', 'R', 'R'])
+    robot_post: str = "Motoman"
+
+
 # ----------------------------------------------------
 # Object class that handles the robot instructions/syntax
-class RobotPost(object):
+class RobotPost(BasePost):
     """Robot post object"""
     PROG_EXT = 'tip'  # set the program extension
     PROG_EXT_VAR = 'tid'
@@ -83,6 +95,7 @@ class RobotPost(object):
     nAxes = 6
 
     def __init__(self, robotpost=None, robotname=None, robot_axes=6, **kwargs):
+        super().__init__(robotpost, robotname, robot_axes, **kwargs)
         self.ROBOT_POST = robotpost
         self.ROBOT_NAME = robotname
         self.PROG = ''
