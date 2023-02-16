@@ -109,8 +109,11 @@ class BasePost(ABC):
     nAxes = 6
 
     @classmethod
-    def from_config(cls, config: BaseRoboDKConfig) -> BasePost:
-        pp = cls(config.robot_post, config.robot_name, config.robot_axes)
+    def from_config(cls, config: BaseRoboDKConfig | dict) -> BasePost:
+        if isinstance(config, dict):
+            pp = cls(config["robot_post"], config["robot_name"], config["robot_axes"])
+        else:
+            pp = cls(config.robot_post, config.robot_name, config.robot_axes)
         pp.__dict__.update(**config.__dict__)
         return pp
 
@@ -127,6 +130,7 @@ class BasePost(ABC):
         self.ROBOT_POST = robotpost
         self.ROBOT_NAME = robotname
         self.PROG = []
+        self.PROG_FILES = []
         self.LOG = ''
         self.nAxes = robot_axes
 
