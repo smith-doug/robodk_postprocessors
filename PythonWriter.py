@@ -1,12 +1,33 @@
 from __future__ import annotations
 
 import functools
-import os
-from dataclasses import dataclass, field
 import inspect
-from .robodk import *
-from .BasePost import BasePost, BaseRoboDKConfig
+import reprlib
+from dataclasses import dataclass
 from pathlib import Path
+
+from numpy import format_float_positional  # We need numpy installed anyway
+
+from .BasePost import BasePost, BaseRoboDKConfig
+
+
+class FloatRepr(reprlib.Repr):
+    """Overrides repr(float) (way harder than it should be), preventing scientific notation and
+    limiting decimals"""
+
+    def _repr_iterable(self, x, level, left, right, maxiter, trail=''):
+        """
+        Calls the base _repr_iterable without a max iteration limit, so that the full list/dict
+        will format
+        """
+        return super()._repr_iterable(x, level, left, right, len(x), trail)
+
+    def repr_float(self, value, level) -> str:
+        return format_float_positional(value, precision=5, trim='0')
+
+
+my_repr_inst = FloatRepr()
+my_repr = my_repr_inst.repr
 
 
 # https://stackoverflow.com/a/73312204
@@ -20,7 +41,7 @@ def function_details(f, *, indent=True):
         siggy = inspect.signature(f)
         bound_siggy = siggy.bind(*args, **kwargs)
         bound_siggy.arguments.pop('self')  # Remove self from args for display
-        all_sargs = ", ".join(kw + "=" + repr(arg) for kw, arg in bound_siggy.arguments.items())
+        all_sargs = ", ".join(kw + "=" + my_repr(arg) for kw, arg in bound_siggy.arguments.items())
         outstr = f"{prefix}robot.{f.__name__}({all_sargs})"
         print(outstr)
         # Add the line to the RobotPost object
@@ -72,7 +93,7 @@ class RobotPost(BasePost):
         cfg_to_remove = ['real_robot_post', 'robot_post', 'robot_name', 'robot_axes']
         extra_cfg = {k: v for k, v in self.config.items() if k not in cfg_to_remove}
         for k, v in extra_cfg.items():
-            top_lines.append(f"\trobot.{k} = {repr(v)}")
+            top_lines.append(f"\trobot.{k} = {my_repr(v)}")
 
         self.top_lines = top_lines
 
