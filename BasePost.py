@@ -112,9 +112,10 @@ class BasePost(ABC):
     def from_config(cls, config: BaseRoboDKConfig | dict) -> BasePost:
         if isinstance(config, dict):
             pp = cls(config["robot_post"], config["robot_name"], config["robot_axes"])
+            pp.__dict__.update(**config)
         else:
             pp = cls(config.robot_post, config.robot_name, config.robot_axes)
-        pp.__dict__.update(**config.__dict__)
+            pp.__dict__.update(**config.__dict__)
         return pp
 
     def __init__(self, robotpost=None, robotname=None, robot_axes=6, **kwargs):
