@@ -42,7 +42,7 @@
 
 # ----------------------------------------------------
 # Import RoboDK tools
-from robodk import *
+from .robodk import *
 
 JOINT_DATA = ['Q1','Q2','Q3','Q4','Q5','Q6','Ra','Rb','Rc']
 

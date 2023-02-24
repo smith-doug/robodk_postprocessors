@@ -58,7 +58,7 @@ MACRO_MESSAGE_TP = '''-- Display message on the teach pendant:
 
 # ----------------------------------------------------
 # Import RoboDK tools
-from robodk import *
+from .robodk import *
 
 # gearbox ratio for external axes
 RATIO_EXTAX = [1,1,1,1,1,1] #[10.6/360.0, 1, 1, 1, 1, 1]

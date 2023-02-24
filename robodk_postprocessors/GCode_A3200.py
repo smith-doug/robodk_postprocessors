@@ -42,7 +42,7 @@
 
 # ----------------------------------------------------
 # Import RoboDK tools
-from robodk import *
+from .robodk import *
 
 JOINT_DATA = ['X','Y','Z','PH','RH','RZ']
 

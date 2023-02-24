@@ -43,7 +43,7 @@
 
 # ----------------------------------------------------
 # Import RoboDK tools
-from robodk import *
+from .robodk import *
 
 ONETAB = '    ' # one tab equals 4 spaces
 

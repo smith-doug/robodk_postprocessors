@@ -43,7 +43,7 @@
 
 # ----------------------------------------------------
 # Import RoboDK tools
-from robodk import *
+from .robodk import *
 
 # ----------------------------------------------------
 def pose_2_str(pose):

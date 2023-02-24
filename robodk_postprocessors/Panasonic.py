@@ -59,7 +59,7 @@ def get_safe_name(progname, max_chars = 7):
 
 # ----------------------------------------------------
 # Import RoboDK tools
-from robodk import *
+from .robodk import *
 import sys
 
 def Pose_2_Panasonic(pose):

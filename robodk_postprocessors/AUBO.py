@@ -43,7 +43,7 @@
 
 # ----------------------------------------------------
 # Import RoboDK tools
-from robodk import *
+from .robodk import *
 
 XML_HEADER = '''<?xml version="1.0" encoding="UTF-8"?>
 <ProcedureProgram>

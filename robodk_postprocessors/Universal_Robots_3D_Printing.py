@@ -148,7 +148,7 @@ def get_safe_name(progname):
 
 # ----------------------------------------------------
 # Import RoboDK tools
-from robodk import *
+from .robodk import *
 
 # ----------------------------------------------------
 import socket

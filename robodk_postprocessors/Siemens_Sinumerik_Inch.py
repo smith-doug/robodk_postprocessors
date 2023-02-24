@@ -52,7 +52,7 @@ MM_2_UNITS = 1.0/25.4 # Use Inch units
 
 # ----------------------------------------------------
 # Import RoboDK tools
-from robodk import *
+from .robodk import *
 
 def conf_2_STAT(confRLF):
     if confRLF is None:

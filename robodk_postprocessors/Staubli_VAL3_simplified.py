@@ -43,7 +43,7 @@
 
 # ----------------------------------------------------
 # Import RoboDK tools
-from robodk import *
+from .robodk import *
 
 
 # Program.pjx file (references data file as %s.dtx)
