@@ -109,6 +109,7 @@ class RobotPost(BasePost):
         outdir = Path(folder)
         outdir.mkdir(exist_ok=True)
         outfile = Path(f'{folder}/{progname}.{self.PROG_EXT}')
+        self.PROG_FILES = [str(outfile)]
 
         self._add_python_header()
 
